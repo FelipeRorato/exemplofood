@@ -35,18 +35,71 @@ const Pedido = () => {
 
     //Filter: seleciona apenas os produtos disponiveis e do carrinho
     const produtosDisponiveis = items.filter(item =>item.disponivel);
-    const carrinho = items.filter(item.quantidade >0)
+    const carrinho = items.filter(item=>item.quantidade >0)
 
     //Reduce: calcula a soma dos itens (preco*quantidade) e adiciona a taxa de entrega
-    const subTotal = carrinho.reduce((ac, item)=>ac.item.preco * item.quantidade, 0)
+    const subTotal = carrinho.reduce((ac, item)=>ac + item.preco * item.quantidade, 0)
     const total = subTotal >0 ? subTotal + taxaEntrega: 0;
+
+    //SIMULAÇÃO DO CICLO DE VIDA DA ENTREGA USANDO TEMPORIZADORES ASSINCRONOS
     
+    const confirmarPedido=()=>{
+        setEnviar(true);
+        setStatus('Restaurante Preparando seu pedido')
+        setTimeout(()=>{
+            setStatus('Seu pedido saiu para entrega!')
+            setEnviar(false);
+
+        },5000)
+        setTimeout(()=>{
+            setStatus('Seu pedido foi entregue com sucesso')
+            setEnviar(false)
+        },10000)
+    }
 
 
   return (
-    <>
-      
-    </>
+    <div>
+        <h1>Cardápio do restaurante</h1>
+        {produtosDisponiveis.map(produto=>(
+            <div key={produto.id}>
+                <span>{produto.nome} (R${produto.preco.toFixed(2)})</span>
+                <div>
+                    <button onClick={()=>{AlterarQuantidade(produto.id,-1)}}>-</button>
+                    <span>{produto.quantidade}</span>
+                    <button onClick={() => {AlterarQuantidade(produto.id,+1)}}>+</button>
+                </div>
+            </div>
+        ))}
+      <hr></hr>
+      <h3>Resumo da entrega</h3>
+      {carrinho.length === 0 ?(
+        <p>Seu carrinho está vazio</p>
+      ):(
+        //fragments
+        <>
+        <ul>
+            {carrinho.map(item=>(
+                <li key={item.id}>
+                    {item.quantidade} x {item.nome} -R$ {(item.preco * item.quantidade).toFixed(2)}
+
+                </li>
+
+            ))}
+        </ul>
+        <p>SubTotal R${subTotal.toFixed(2)}</p>
+        <p>Taxa de entrega: R$ {taxaEntrega.toFixed(2)}</p>
+        <button onClick={confirmarPedido} disabled={enviar}>
+            {enviar ? "Enviando..." : 'Confirmar pedido'}
+        </button>
+        </>
+      )}
+      {status && (
+        <div>
+            <strong>Alerta:</strong>{status}
+        </div>
+      )}
+    </div>
   )
 }
 
